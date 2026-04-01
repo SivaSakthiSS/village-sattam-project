@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Admin — Complaints{% endblock %}
+
+{% block content %}
+<div class="page-header admin-header">
+    <div class="container">
+        <h1><i class="fas fa-bullhorn"></i> Manage Complaints</h1>
+    </div>
+</div>
+<div class="admin-nav-bar">
+    <div class="container admin-nav-links">
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-bar"></i> Overview</a>
+        <a href="{{ url_for('admin_schemes') }}"><i class="fas fa-scroll"></i> Schemes</a>
+        <a href="{{ url_for('admin_complaints') }}" class="active"><i class="fas fa-bullhorn"></i> Complaints</a>
+        <a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Users</a>
+        <a href="{{ url_for('admin_announcements') }}"><i class="fas fa-bell"></i> Announcements</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="filter-bar">
+        <div class="filter-pills">
+            <a href="{{ url_for('admin_complaints') }}" class="pill {% if not status_filter %}active{% endif %}">All</a>
+            <a href="{{ url_for('admin_complaints', status='Pending') }}" class="pill {% if status_filter == 'Pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('admin_complaints', status='In Progress') }}" class="pill {% if status_filter == 'In Progress' %}active{% endif %}">In Progress</a>
+            <a href="{{ url_for('admin_complaints', status='Resolved') }}" class="pill {% if status_filter == 'Resolved' %}active{% endif %}">Resolved</a>
+            <a href="{{ url_for('admin_complaints', status='Rejected') }}" class="pill {% if status_filter == 'Rejected' %}active{% endif %}">Rejected</a>
+        </div>
+        <span class="result-count">{{ complaints|length }} complaints</span>
+    </div>
+
+    <div class="list-card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr><th>#</th><th>Citizen</th><th>Village</th><th>Title</th><th>Description</th><th>Status</th><th>Date</th><th>Update</th></tr>
+                </thead>
+                <tbody>
+                    {% for c in complaints %}
+                    <tr>
+                        <td class="muted">#{{ c.id }}</td>
+                        <td>
+                            <strong>{{ c.user_name }}</strong>
+                            <br><span class="muted small">{{ c.user_email }}</span>
+                        </td>
+                        <td class="muted">{{ c.village or '—' }}</td>
+                        <td><strong>{{ c.title[:35] }}{% if c.title|length > 35 %}...{% endif %}</strong></td>
+                        <td class="muted small">{{ c.description[:60] }}...</td>
+                        <td><span class="status-badge status-{{ c.status.lower().replace(' ','-') }}">{{ c.status }}</span></td>
+                        <td class="muted">{{ c.created_at.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('update_complaint') }}" class="inline-form">
+                                <input type="hidden" name="complaint_id" value="{{ c.id }}">
+                                <select name="status" class="mini-select" onchange="this.form.submit()">
+                                    <option value="">Change Status</option>
+                                    <option value="Pending" {% if c.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="In Progress" {% if c.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="Resolved" {% if c.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                    <option value="Rejected" {% if c.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8" class="empty-state">No complaints found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

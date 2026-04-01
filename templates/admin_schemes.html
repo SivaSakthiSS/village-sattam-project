@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Admin — Schemes{% endblock %}
+
+{% block content %}
+<div class="page-header admin-header">
+    <div class="container">
+        <h1><i class="fas fa-scroll"></i> Manage Schemes</h1>
+    </div>
+</div>
+<div class="admin-nav-bar">
+    <div class="container admin-nav-links">
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-bar"></i> Overview</a>
+        <a href="{{ url_for('admin_schemes') }}" class="active"><i class="fas fa-scroll"></i> Schemes</a>
+        <a href="{{ url_for('admin_complaints') }}"><i class="fas fa-bullhorn"></i> Complaints</a>
+        <a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Users</a>
+        <a href="{{ url_for('admin_announcements') }}"><i class="fas fa-bell"></i> Announcements</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="admin-content-grid">
+        <!-- Add Scheme Form -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h2>Add New Scheme</h2>
+            </div>
+            <form method="POST" id="addSchemeForm">
+                <input type="hidden" name="action" value="add">
+                <div class="form-group">
+                    <label>Scheme Title *</label>
+                    <input type="text" name="title" required placeholder="Enter scheme name">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category">
+                        <option value="General">General</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Health">Health</option>
+                        <option value="Energy">Energy</option>
+                        <option value="Business">Business</option>
+                        <option value="Education">Education</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required placeholder="Scheme description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Eligibility</label>
+                    <textarea name="eligibility" rows="2" placeholder="Who is eligible?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Benefits</label>
+                    <textarea name="benefits" rows="2" placeholder="What are the benefits?"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-plus"></i> Add Scheme
+                </button>
+            </form>
+        </div>
+
+        <!-- Schemes Table -->
+        <div class="list-card">
+            <div class="list-card-header">
+                <h2>All Schemes ({{ schemes|length }})</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>#</th><th>Title</th><th>Category</th><th>Added</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in schemes %}
+                        <tr>
+                            <td class="muted">{{ s.id }}</td>
+                            <td><strong>{{ s.title[:40] }}</strong></td>
+                            <td><span class="badge badge-blue">{{ s.category }}</span></td>
+                            <td class="muted">{{ s.created_at.strftime('%d %b %Y') }}</td>
+                            <td>
+                                <button class="btn-icon edit-btn" onclick="editScheme({{ s.id }}, '{{ s.title|e }}', '{{ s.description|e }}', '{{ s.eligibility|e }}', '{{ s.benefits|e }}', '{{ s.category|e }}')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form method="POST" style="display:inline" onsubmit="return confirm('Delete this scheme?')">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="scheme_id" value="{{ s.id }}">
+                                    <button type="submit" class="btn-icon delete-btn" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="empty-state">No schemes added yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box modal-lg" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Edit Scheme</h3>
+            <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" id="editForm">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="scheme_id" id="editId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category" id="editCategory">
+                        <option value="General">General</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Health">Health</option>
+                        <option value="Energy">Energy</option>
+                        <option value="Business">Business</option>
+                        <option value="Education">Education</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" id="editDesc" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Eligibility</label>
+                    <textarea name="eligibility" id="editElig" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Benefits</label>
+                    <textarea name="benefits" id="editBen" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Update Scheme</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editScheme(id, title, desc, elig, ben, cat) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editTitle').value = title;
+    document.getElementById('editDesc').value = desc;
+    document.getElementById('editElig').value = elig;
+    document.getElementById('editBen').value = ben;
+    document.getElementById('editCategory').value = cat;
+    document.getElementById('editModal').classList.add('active');
+}
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+}
+</script>
+{% endblock %}

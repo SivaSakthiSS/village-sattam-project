@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ scheme.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="{{ url_for('schemes') }}">Schemes</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>{{ scheme.title[:40] }}</span>
+        </nav>
+        <h1>{{ scheme.title }}</h1>
+        <span class="page-badge">{{ scheme.category }}</span>
+    </div>
+</div>
+
+<div class="container scheme-detail-layout">
+    <div class="scheme-detail-main">
+        <div class="detail-card">
+            <h2><i class="fas fa-info-circle"></i> About This Scheme</h2>
+            <p>{{ scheme.description }}</p>
+        </div>
+
+        {% if scheme.eligibility %}
+        <div class="detail-card">
+            <h2><i class="fas fa-user-check"></i> Eligibility Criteria</h2>
+            <p>{{ scheme.eligibility }}</p>
+        </div>
+        {% endif %}
+
+        {% if scheme.benefits %}
+        <div class="detail-card benefits-card">
+            <h2><i class="fas fa-gift"></i> Benefits</h2>
+            <p>{{ scheme.benefits }}</p>
+        </div>
+        {% endif %}
+
+        <div class="detail-card how-to-card">
+            <h2><i class="fas fa-clipboard-list"></i> How to Apply</h2>
+            <ol>
+                <li>Visit your nearest Common Service Centre (CSC) or Gram Panchayat office</li>
+                <li>Carry Aadhaar Card, Bank Passbook, and relevant documents</li>
+                <li>Fill the application form for the scheme</li>
+                <li>Submit documents and receive an acknowledgement slip</li>
+                <li>Track application status at official government portal</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="scheme-detail-sidebar">
+        <div class="sidebar-card">
+            <h4>Quick Info</h4>
+            <ul class="info-list">
+                <li><i class="fas fa-tag"></i> <span>Category: {{ scheme.category }}</span></li>
+                <li><i class="fas fa-calendar"></i> <span>Added: {{ scheme.created_at.strftime('%d %B %Y') }}</span></li>
+                <li><i class="fas fa-check-circle" style="color:#10b981"></i> <span>Status: Active</span></li>
+            </ul>
+        </div>
+        <div class="sidebar-card">
+            <h4>Need Help?</h4>
+            <p>Contact your local Gram Panchayat office or call the helpline:</p>
+            <a href="tel:1800111000" class="btn btn-primary btn-block">
+                <i class="fas fa-phone"></i> 1800-111-000
+            </a>
+        </div>
+        <div class="sidebar-card">
+            <a href="{{ url_for('schemes') }}" class="btn btn-outline btn-block">
+                <i class="fas fa-arrow-left"></i> Back to All Schemes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

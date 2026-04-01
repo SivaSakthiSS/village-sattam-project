@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}My Complaints{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-bullhorn"></i> Complaint Management</h1>
+        <p>Submit and track your public grievances</p>
+    </div>
+</div>
+
+<div class="container complaint-layout">
+    <!-- Submit Form -->
+    <div class="complaint-form-section">
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h2>Submit New Complaint</h2>
+            </div>
+            <form method="POST" action="{{ url_for('complaints') }}" id="complaintForm">
+                <div class="form-group">
+                    <label for="title"><i class="fas fa-heading"></i> Complaint Title *</label>
+                    <input type="text" id="title" name="title" placeholder="Brief title of your complaint" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="description"><i class="fas fa-align-left"></i> Detailed Description *</label>
+                    <textarea id="description" name="description" rows="5"
+                              placeholder="Describe the issue in detail (location, nature of problem, urgency, etc.)"
+                              required minlength="20"></textarea>
+                    <div class="char-count"><span id="charCount">0</span>/500 characters</div>
+                </div>
+                <div class="complaint-tips">
+                    <h5><i class="fas fa-lightbulb"></i> Tips for a good complaint</h5>
+                    <ul>
+                        <li>Mention the exact location of the issue</li>
+                        <li>Describe how long the problem has existed</li>
+                        <li>Explain the impact on the community</li>
+                    </ul>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-paper-plane"></i> Submit Complaint
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Complaints List -->
+    <div class="complaints-list-section">
+        <div class="list-card">
+            <div class="list-card-header">
+                <h2><i class="fas fa-list"></i> My Submitted Complaints</h2>
+                <span class="count-badge">{{ complaints|length }} total</span>
+            </div>
+
+            {% if complaints %}
+            <div class="complaints-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in complaints %}
+                        <tr class="complaint-row" onclick="showComplaintModal({{ c.id }}, &quot;{{ c.title|e }}&quot;, &quot;{{ c.description|e }}&quot;, &quot;{{ c.status }}&quot;, &quot;{{ c.created_at.strftime('%d %b %Y') }}&quot;)">
+                            <td class="muted">#{{ c.id }}</td>
+                            <td>
+                                <span class="complaint-title">{{ c.title[:50] }}{% if c.title|length > 50 %}...{% endif %}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ c.status.lower().replace(' ','-') }}">
+                                    {% if c.status == 'Pending' %}<i class="fas fa-clock"></i>
+                                    {% elif c.status == 'In Progress' %}<i class="fas fa-spinner"></i>
+                                    {% elif c.status == 'Resolved' %}<i class="fas fa-check"></i>
+                                    {% else %}<i class="fas fa-times"></i>{% endif %}
+                                    {{ c.status }}
+                                </span>
+                            </td>
+                            <td class="muted">{{ c.created_at.strftime('%d %b %Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-hint"><i class="fas fa-mouse-pointer"></i> Click a row to see full details</p>
+            {% else %}
+            <div class="empty-state-box">
+                <i class="fas fa-inbox"></i>
+                <p>You haven't submitted any complaints yet.</p>
+                <p class="muted">Use the form on the left to file your first complaint.</p>
+            </div>
+            {% endif %}
+
+            <!-- Status Legend -->
+            <div class="status-legend">
+                <h5>Status Guide:</h5>
+                <div class="legend-items">
+                    <span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span>
+                    <span class="status-badge status-in-progress"><i class="fas fa-spinner"></i> In Progress</span>
+                    <span class="status-badge status-resolved"><i class="fas fa-check"></i> Resolved</span>
+                    <span class="status-badge status-rejected"><i class="fas fa-times"></i> Rejected</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Complaint Detail Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modalTitle">Complaint Details</h3>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-meta">
+                <span id="modalId" class="muted"></span>
+                <span id="modalStatus" class="status-badge"></span>
+                <span id="modalDate" class="muted"></span>
+            </div>
+            <div class="modal-desc">
+                <h4>Description:</h4>
+                <p id="modalDesc"></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Character counter
+const desc = document.getElementById('description');
+const charCount = document.getElementById('charCount');
+if (desc) {
+    desc.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+        charCount.style.color = this.value.length > 450 ? '#ef4444' : 'inherit';
+    });
+}
+function showComplaintModal(id, title, description, status, date) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalId').textContent = '#' + id;
+    document.getElementById('modalDate').textContent = date;
+    document.getElementById('modalDesc').textContent = description;
+    const sb = document.getElementById('modalStatus');
+    sb.textContent = status;
+    sb.className = 'status-badge status-' + status.toLowerCase().replace(' ', '-');
+    document.getElementById('modalOverlay').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+</script>
+{% endblock %}

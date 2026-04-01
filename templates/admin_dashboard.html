@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header admin-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div>
+                <h1><i class="fas fa-shield-alt"></i> Admin Panel</h1>
+                <p>Village Sattam — Control Center</p>
+            </div>
+            <div class="admin-badge"><i class="fas fa-lock"></i> Secure Admin Access</div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Nav -->
+<div class="admin-nav-bar">
+    <div class="container admin-nav-links">
+        <a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-bar"></i> Overview
+        </a>
+        <a href="{{ url_for('admin_schemes') }}" class="{% if 'admin_schemes' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-scroll"></i> Schemes
+        </a>
+        <a href="{{ url_for('admin_complaints') }}" class="{% if 'admin_complaints' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-bullhorn"></i> Complaints
+        </a>
+        <a href="{{ url_for('admin_users') }}" class="{% if 'admin_users' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-users"></i> Users
+        </a>
+        <a href="{{ url_for('admin_announcements') }}" class="{% if 'admin_announcements' in request.endpoint %}active{% endif %}">
+            <i class="fas fa-bell"></i> Announcements
+        </a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Stats -->
+    <div class="stats-row admin-stats">
+        <div class="stat-widget" style="--accent: #1E3A8A">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.total_users }}</span>
+                <span class="stat-label">Total Users</span>
+            </div>
+        </div>
+        <div class="stat-widget" style="--accent: #3B82F6">
+            <div class="stat-icon"><i class="fas fa-scroll"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.total_schemes }}</span>
+                <span class="stat-label">Schemes</span>
+            </div>
+        </div>
+        <div class="stat-widget" style="--accent: #f59e0b">
+            <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.total_complaints }}</span>
+                <span class="stat-label">Total Complaints</span>
+            </div>
+        </div>
+        <div class="stat-widget" style="--accent: #ef4444">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.pending }}</span>
+                <span class="stat-label">Pending</span>
+            </div>
+        </div>
+        <div class="stat-widget" style="--accent: #10b981">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.resolved }}</span>
+                <span class="stat-label">Resolved</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-grid">
+        <!-- Recent Complaints -->
+        <div class="dash-card full-width">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-bullhorn"></i> Recent Complaints</h3>
+                <a href="{{ url_for('admin_complaints') }}" class="view-all">Manage All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Citizen</th>
+                            <th>Village</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in recent_complaints %}
+                        <tr>
+                            <td class="muted">#{{ c.id }}</td>
+                            <td><strong>{{ c.user_name }}</strong></td>
+                            <td class="muted">{{ c.village or '—' }}</td>
+                            <td>{{ c.title[:40] }}{% if c.title|length > 40 %}...{% endif %}</td>
+                            <td><span class="status-badge status-{{ c.status.lower().replace(' ','-') }}">{{ c.status }}</span></td>
+                            <td class="muted">{{ c.created_at.strftime('%d %b %Y') }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('update_complaint') }}" class="inline-form">
+                                    <input type="hidden" name="complaint_id" value="{{ c.id }}">
+                                    <select name="status" class="mini-select" onchange="this.form.submit()">
+                                        <option value="">Change...</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="Resolved">Resolved</option>
+                                        <option value="Rejected">Rejected</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" class="empty-state">No complaints yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-users"></i> Recent Users</h3>
+                <a href="{{ url_for('admin_users') }}" class="view-all">View All</a>
+            </div>
+            <div class="users-list">
+                {% for user in recent_users %}
+                <div class="user-list-item">
+                    <div class="user-avatar-sm">{{ user.name[0].upper() }}</div>
+                    <div class="user-info">
+                        <strong>{{ user.name }}</strong>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    <span class="muted">{{ user.village or '—' }}</span>
+                </div>
+                {% else %}
+                <p class="empty-state">No users yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Complaint Status Chart -->
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-chart-pie"></i> Status Summary</h3>
+            </div>
+            <div class="status-chart">
+                <div class="chart-bars">
+                    {% set total = stats.total_complaints or 1 %}
+                    <div class="chart-bar-item">
+                        <span class="bar-label">Pending</span>
+                        <div class="bar-wrap">
+                            <div class="bar bar-pending" style="width: {{ (stats.pending / total * 100) | int }}%"></div>
+                        </div>
+                        <span class="bar-val">{{ stats.pending }}</span>
+                    </div>
+                    <div class="chart-bar-item">
+                        <span class="bar-label">In Progress</span>
+                        <div class="bar-wrap">
+                            <div class="bar bar-inprogress" style="width: {{ (stats.in_progress / total * 100) | int }}%"></div>
+                        </div>
+                        <span class="bar-val">{{ stats.in_progress }}</span>
+                    </div>
+                    <div class="chart-bar-item">
+                        <span class="bar-label">Resolved</span>
+                        <div class="bar-wrap">
+                            <div class="bar bar-resolved" style="width: {{ (stats.resolved / total * 100) | int }}%"></div>
+                        </div>
+                        <span class="bar-val">{{ stats.resolved }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-shortcuts">
+                <a href="{{ url_for('admin_schemes') }}" class="shortcut-btn">
+                    <i class="fas fa-plus"></i> Add Scheme
+                </a>
+                <a href="{{ url_for('admin_announcements') }}" class="shortcut-btn">
+                    <i class="fas fa-bell"></i> Post Notice
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

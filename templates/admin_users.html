@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Admin — Users{% endblock %}
+
+{% block content %}
+<div class="page-header admin-header">
+    <div class="container">
+        <h1><i class="fas fa-users"></i> Registered Users</h1>
+    </div>
+</div>
+<div class="admin-nav-bar">
+    <div class="container admin-nav-links">
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-bar"></i> Overview</a>
+        <a href="{{ url_for('admin_schemes') }}"><i class="fas fa-scroll"></i> Schemes</a>
+        <a href="{{ url_for('admin_complaints') }}"><i class="fas fa-bullhorn"></i> Complaints</a>
+        <a href="{{ url_for('admin_users') }}" class="active"><i class="fas fa-users"></i> Users</a>
+        <a href="{{ url_for('admin_announcements') }}"><i class="fas fa-bell"></i> Announcements</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="list-card">
+        <div class="list-card-header">
+            <h2>All Citizens ({{ users|length }})</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr><th>#</th><th>Name</th><th>Email</th><th>Village</th><th>Complaints</th><th>Joined</th></tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td class="muted">{{ u.id }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-sm">{{ u.name[0].upper() }}</div>
+                                <strong>{{ u.name }}</strong>
+                            </div>
+                        </td>
+                        <td class="muted">{{ u.email }}</td>
+                        <td>{{ u.village or '—' }}</td>
+                        <td><span class="count-badge">{{ u.complaint_count }}</span></td>
+                        <td class="muted">{{ u.created_at.strftime('%d %b %Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="empty-state">No users registered yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

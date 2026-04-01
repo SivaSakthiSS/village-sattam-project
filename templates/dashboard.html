@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <div>
+                <h1><i class="fas fa-tachometer-alt"></i> My Dashboard</h1>
+                <p>Welcome back, <strong>{{ session.user_name }}</strong> — {{ session.village or 'Village Citizen' }}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('complaints') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> New Complaint
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container dashboard-layout">
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-widget" style="--accent: #1E3A8A">
+            <div class="stat-icon"><i class="fas fa-scroll"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.total_schemes }}</span>
+                <span class="stat-label">Available Schemes</span>
+            </div>
+        </div>
+        <div class="stat-widget" style="--accent: #f59e0b">
+            <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.total_complaints }}</span>
+                <span class="stat-label">My Complaints</span>
+            </div>
+        </div>
+        <div class="stat-widget" style="--accent: #ef4444">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.pending }}</span>
+                <span class="stat-label">Pending</span>
+            </div>
+        </div>
+        <div class="stat-widget" style="--accent: #10b981">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+                <span class="stat-number">{{ stats.resolved }}</span>
+                <span class="stat-label">Resolved</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Main Column -->
+        <div class="dashboard-main">
+            <!-- Recent Schemes -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3><i class="fas fa-scroll"></i> Government Schemes</h3>
+                    <a href="{{ url_for('schemes') }}" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="schemes-list">
+                    {% for scheme in schemes %}
+                    <div class="scheme-list-item">
+                        <div class="scheme-list-icon">
+                            {% if scheme.category == 'Agriculture' %}<i class="fas fa-seedling"></i>
+                            {% elif scheme.category == 'Housing' %}<i class="fas fa-home"></i>
+                            {% elif scheme.category == 'Health' %}<i class="fas fa-heartbeat"></i>
+                            {% elif scheme.category == 'Energy' %}<i class="fas fa-bolt"></i>
+                            {% elif scheme.category == 'Business' %}<i class="fas fa-briefcase"></i>
+                            {% else %}<i class="fas fa-star"></i>{% endif %}
+                        </div>
+                        <div class="scheme-list-info">
+                            <h4>{{ scheme.title }}</h4>
+                            <p>{{ scheme.description[:90] }}...</p>
+                        </div>
+                        <div class="scheme-list-cat">
+                            <span class="badge badge-blue">{{ scheme.category }}</span>
+                            <a href="{{ url_for('scheme_detail', scheme_id=scheme.id) }}" class="btn-link">View</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="empty-state">No schemes available yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- My Complaints -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3><i class="fas fa-bullhorn"></i> My Complaints</h3>
+                    <a href="{{ url_for('complaints') }}" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                </div>
+                {% if complaints %}
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in complaints %}
+                            <tr>
+                                <td class="muted">#{{ c.id }}</td>
+                                <td>{{ c.title[:45] }}{% if c.title|length > 45 %}...{% endif %}</td>
+                                <td><span class="status-badge status-{{ c.status.lower().replace(' ','-') }}">{{ c.status }}</span></td>
+                                <td class="muted">{{ c.created_at.strftime('%d %b %Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state-box">
+                    <i class="fas fa-inbox"></i>
+                    <p>No complaints submitted yet.</p>
+                    <a href="{{ url_for('complaints') }}" class="btn btn-primary btn-sm">Submit Complaint</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="dashboard-sidebar">
+            <!-- Announcements -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3><i class="fas fa-bell"></i> Notices</h3>
+                </div>
+                <div class="notice-list">
+                    {% for ann in announcements %}
+                    <div class="notice-item">
+                        <div class="notice-dot"></div>
+                        <div>
+                            <h5>{{ ann.title }}</h5>
+                            <p>{{ ann.content[:80] }}...</p>
+                            <span class="notice-date">{{ ann.created_at.strftime('%d %b') }}</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="empty-state">No announcements.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="quick-actions">
+                    <a href="{{ url_for('complaints') }}" class="qa-btn">
+                        <i class="fas fa-plus-circle"></i> File Complaint
+                    </a>
+                    <a href="{{ url_for('schemes') }}" class="qa-btn">
+                        <i class="fas fa-search"></i> Search Schemes
+                    </a>
+                    <a href="{{ url_for('complaints') }}" class="qa-btn">
+                        <i class="fas fa-list-ul"></i> Track Status
+                    </a>
+                    <a href="{{ url_for('index') }}#announcements" class="qa-btn">
+                        <i class="fas fa-bell"></i> Notices
+                    </a>
+                </div>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="dash-card profile-card">
+                <div class="profile-avatar">
+                    {{ session.user_name[0].upper() }}
+                </div>
+                <h4>{{ session.user_name }}</h4>
+                <p class="profile-village"><i class="fas fa-map-marker-alt"></i> {{ session.village or 'No village set' }}</p>
+                <p class="profile-email"><i class="fas fa-envelope"></i> {{ session.user_email }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

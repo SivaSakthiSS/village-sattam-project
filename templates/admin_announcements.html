@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Admin — Announcements{% endblock %}
+
+{% block content %}
+<div class="page-header admin-header">
+    <div class="container">
+        <h1><i class="fas fa-bell"></i> Manage Announcements</h1>
+    </div>
+</div>
+<div class="admin-nav-bar">
+    <div class="container admin-nav-links">
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-bar"></i> Overview</a>
+        <a href="{{ url_for('admin_schemes') }}"><i class="fas fa-scroll"></i> Schemes</a>
+        <a href="{{ url_for('admin_complaints') }}"><i class="fas fa-bullhorn"></i> Complaints</a>
+        <a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Users</a>
+        <a href="{{ url_for('admin_announcements') }}" class="active"><i class="fas fa-bell"></i> Announcements</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="admin-content-grid">
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h2>New Announcement</h2>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" name="title" required placeholder="Announcement title">
+                </div>
+                <div class="form-group">
+                    <label>Content *</label>
+                    <textarea name="content" rows="4" required placeholder="Announcement details..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-paper-plane"></i> Publish
+                </button>
+            </form>
+        </div>
+
+        <div class="list-card">
+            <div class="list-card-header">
+                <h2>Published Notices ({{ announcements|length }})</h2>
+            </div>
+            {% for ann in announcements %}
+            <div class="ann-admin-item">
+                <div class="ann-admin-content">
+                    <h4>{{ ann.title }}</h4>
+                    <p>{{ ann.content }}</p>
+                    <span class="muted small">{{ ann.created_at.strftime('%d %b %Y at %H:%M') }}</span>
+                </div>
+                <form method="POST" onsubmit="return confirm('Delete this announcement?')">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="ann_id" value="{{ ann.id }}">
+                    <button type="submit" class="btn-icon delete-btn"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+            {% else %}
+            <p class="empty-state">No announcements published.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

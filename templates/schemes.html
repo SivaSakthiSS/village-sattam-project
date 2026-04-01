@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Government Schemes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-scroll"></i> Government Schemes</h1>
+        <p>Explore all available welfare schemes and check your eligibility</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Search & Filter -->
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('schemes') }}" class="filter-form" id="filterForm">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Search schemes by name or keyword..."
+                       value="{{ search }}" id="searchInput">
+                {% if search %}
+                    <button type="button" class="clear-search" onclick="clearSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                {% endif %}
+            </div>
+            <div class="filter-select-group">
+                <label>Category:</label>
+                <select name="category" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == selected_cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-filter"></i> Apply
+            </button>
+            {% if search or selected_cat %}
+            <a href="{{ url_for('schemes') }}" class="btn btn-outline btn-sm">
+                <i class="fas fa-undo"></i> Reset
+            </a>
+            {% endif %}
+        </form>
+        <span class="result-count">{{ schemes|length }} scheme(s) found</span>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="category-pills">
+        <a href="{{ url_for('schemes') }}" class="pill {% if not selected_cat %}active{% endif %}">All</a>
+        {% for cat in categories %}
+        <a href="{{ url_for('schemes', category=cat) }}" class="pill {% if cat == selected_cat %}active{% endif %}">
+            {% if cat == 'Agriculture' %}<i class="fas fa-seedling"></i>
+            {% elif cat == 'Housing' %}<i class="fas fa-home"></i>
+            {% elif cat == 'Health' %}<i class="fas fa-heartbeat"></i>
+            {% elif cat == 'Energy' %}<i class="fas fa-bolt"></i>
+            {% elif cat == 'Business' %}<i class="fas fa-briefcase"></i>
+            {% else %}<i class="fas fa-star"></i>{% endif %}
+            {{ cat }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Schemes Grid -->
+    {% if schemes %}
+    <div class="schemes-grid-full">
+        {% for scheme in schemes %}
+        <div class="scheme-card-full">
+            <div class="scheme-card-top">
+                <div class="scheme-cat-icon">
+                    {% if scheme.category == 'Agriculture' %}<i class="fas fa-seedling"></i>
+                    {% elif scheme.category == 'Housing' %}<i class="fas fa-home"></i>
+                    {% elif scheme.category == 'Health' %}<i class="fas fa-heartbeat"></i>
+                    {% elif scheme.category == 'Energy' %}<i class="fas fa-bolt"></i>
+                    {% elif scheme.category == 'Business' %}<i class="fas fa-briefcase"></i>
+                    {% else %}<i class="fas fa-star"></i>{% endif %}
+                </div>
+                <span class="scheme-cat-badge">{{ scheme.category }}</span>
+            </div>
+            <h3>{{ scheme.title }}</h3>
+            <p class="scheme-desc">{{ scheme.description[:150] }}...</p>
+            <div class="scheme-highlights">
+                {% if scheme.eligibility %}
+                <div class="highlight">
+                    <i class="fas fa-user-check"></i>
+                    <span><strong>Eligibility:</strong> {{ scheme.eligibility[:80] }}...</span>
+                </div>
+                {% endif %}
+                {% if scheme.benefits %}
+                <div class="highlight">
+                    <i class="fas fa-gift"></i>
+                    <span><strong>Benefit:</strong> {{ scheme.benefits[:80] }}...</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="scheme-card-footer">
+                <span class="scheme-date"><i class="fas fa-calendar"></i> {{ scheme.created_at.strftime('%d %b %Y') }}</span>
+                {% if session.user_id %}
+                <a href="{{ url_for('scheme_detail', scheme_id=scheme.id) }}" class="btn btn-primary btn-sm">
+                    Full Details <i class="fas fa-arrow-right"></i>
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Login to View</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-page-state">
+        <i class="fas fa-search"></i>
+        <h3>No schemes found</h3>
+        <p>Try adjusting your search or filter criteria.</p>
+        <a href="{{ url_for('schemes') }}" class="btn btn-primary">Clear Filters</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterForm').submit();
+}
+</script>
+{% endblock %}

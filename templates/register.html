@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" width="70" height="70">
+                <circle cx="30" cy="30" r="28" fill="#1E3A8A" stroke="#F59E0B" stroke-width="2"/>
+                <circle cx="30" cy="30" r="7" fill="none" stroke="#F59E0B" stroke-width="1.5"/>
+                <line x1="30" y1="8" x2="30" y2="23" stroke="#F59E0B" stroke-width="1.2"/>
+                <line x1="30" y1="37" x2="30" y2="52" stroke="#F59E0B" stroke-width="1.2"/>
+                <line x1="8" y1="30" x2="23" y2="30" stroke="#F59E0B" stroke-width="1.2"/>
+                <line x1="37" y1="30" x2="52" y2="30" stroke="#F59E0B" stroke-width="1.2"/>
+                <polygon points="30,16 22,26 38,26" fill="#F59E0B"/>
+                <rect x="24" y="26" width="12" height="10" fill="#F59E0B"/>
+                <rect x="27.5" y="30" width="5" height="6" fill="#1E3A8A"/>
+            </svg>
+            <h2>Join Village Sattam</h2>
+            <p>Create your account and access all government services designed for rural citizens.</p>
+            <ul class="auth-features">
+                <li><i class="fas fa-check"></i> 100% Free Registration</li>
+                <li><i class="fas fa-check"></i> Secure & Private</li>
+                <li><i class="fas fa-check"></i> Mobile Friendly</li>
+                <li><i class="fas fa-check"></i> 24/7 Access</li>
+            </ul>
+        </div>
+    </div>
+    <div class="auth-right">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Register for Village Sattam Portal</p>
+            </div>
+            <form method="POST" action="{{ url_for('register') }}" class="auth-form" id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name"><i class="fas fa-user"></i> Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your full name" required
+                               value="{{ form_data.get('name','') }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="village"><i class="fas fa-map-marker-alt"></i> Village Name</label>
+                        <input type="text" id="village" name="village" placeholder="Your village"
+                               value="{{ form_data.get('village','') }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required
+                           value="{{ form_data.get('email','') }}">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Password</label>
+                        <div class="input-with-toggle">
+                            <input type="password" id="password" name="password" placeholder="Min 6 characters" required>
+                            <button type="button" class="toggle-pw" onclick="togglePassword('password')">
+                                <i class="fas fa-eye" id="password-eye"></i>
+                            </button>
+                        </div>
+                        <div class="pw-strength" id="pwStrength"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password"><i class="fas fa-lock"></i> Confirm Password</label>
+                        <div class="input-with-toggle">
+                            <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat password" required>
+                            <button type="button" class="toggle-pw" onclick="togglePassword('confirm_password')">
+                                <i class="fas fa-eye" id="confirm_password-eye"></i>
+                            </button>
+                        </div>
+                        <div class="pw-match" id="pwMatch"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+            <div class="auth-footer">
+                <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+                <a href="{{ url_for('index') }}">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePassword(id) {
+    const inp = document.getElementById(id);
+    const eye = document.getElementById(id + '-eye');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    eye.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+document.getElementById('password').addEventListener('input', function() {
+    const val = this.value;
+    const el = document.getElementById('pwStrength');
+    if (val.length < 4) { el.innerHTML = '<span class="weak">Weak</span>'; el.className = 'pw-strength'; }
+    else if (val.length < 7) { el.innerHTML = '<span class="medium">Medium</span>'; el.className = 'pw-strength medium'; }
+    else { el.innerHTML = '<span class="strong">Strong</span>'; el.className = 'pw-strength strong'; }
+});
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const pw = document.getElementById('password').value;
+    const el = document.getElementById('pwMatch');
+    if (this.value && this.value !== pw) el.innerHTML = '<span class="mismatch">Passwords do not match</span>';
+    else if (this.value) el.innerHTML = '<span class="match">✓ Passwords match</span>';
+    else el.innerHTML = '';
+});
+</script>
+{% endblock %}
