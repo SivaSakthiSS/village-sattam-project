@@ -2,3 +2,4 @@ Flask
 PyMySQL
 Werkzeug
 mysql-connector-python
+gunicorn==20.1.0
