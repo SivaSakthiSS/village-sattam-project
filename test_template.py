@@ -1,52 +1,24 @@
-from flask import Flask, render_template
-from config import Config
-import pymysql
+import mysql.connector
+from urllib.parse import urlparse
+import os
 
-app = Flask(__name__)
-app.config.from_object(Config)
+DATABASE_URL = os.getenv('DATABASE_URL', "mysql://root:fpwyMeYfiWKNKaHxmmuCPNyvochKibYw@interchange.proxy.rlwy.net:19314/railway")
 
-def get_db():
-    return pymysql.connect(
-        host=app.config['MYSQL_HOST'],
-        user=app.config['MYSQL_USER'],
-        password=app.config['MYSQL_PASSWORD'],
-        db=app.config['MYSQL_DB'],
-        port=app.config['MYSQL_PORT'],
-        charset='utf8mb4',
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=True
-    )
+url = urlparse(DATABASE_URL)
 
-try:
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute('SELECT COUNT(*) as c FROM users WHERE is_admin=0')
-        total_users = cur.fetchone()['c']
-        cur.execute('SELECT COUNT(*) as c FROM schemes')
-        total_schemes = cur.fetchone()['c']
-        cur.execute('SELECT COUNT(*) as c FROM complaints')
-        total_complaints = cur.fetchone()['c']
-        cur.execute("SELECT COUNT(*) as c FROM complaints WHERE status='Pending'")
-        pending = cur.fetchone()['c']
-        cur.execute("SELECT COUNT(*) as c FROM complaints WHERE status='Resolved'")
-        resolved = cur.fetchone()['c']
+print("HOST:", url.hostname)
+print("PORT:", url.port)
+print("USER:", url.username)
+print("DB:", url.path)
 
-    stats = {
-        'total_users': total_users,
-        'total_schemes': total_schemes,
-        'total_complaints': total_complaints,
-        'pending': pending,
-        'resolved': resolved,
-        'in_progress': total_complaints - pending - resolved
-    }
+db = mysql.connector.connect(
+    host=url.hostname,
+    user=url.username,
+    password=url.password,
+    database=url.path[1:],
+    port=url.port or 3306
+)
 
-    # Test template rendering
-    with app.app_context():
-        rendered = render_template('admin_dashboard.html', stats=stats, recent_complaints=[], recent_users=[])
-        print('Template rendered successfully!')
-        print('Stats:', stats)
+print("✅ Railway MySQL Connected!")
 
-    db.close()
 
-except Exception as e:
-    print(f'Error: {e}')

@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS village_sattam;
-USE village_sattam;
-
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -36,9 +33,6 @@ CREATE TABLE IF NOT EXISTS announcements (
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-INSERT INTO users (name, email, password, village, is_admin) VALUES
-('Admin', 'admin@villagesattam.gov.in', 'scrypt:32768:8:1$XQ1cVhv2VnL8nIgO$e4a7b6c2d1e0f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0', 'District HQ', 1);
 
 INSERT INTO schemes (title, description, eligibility, benefits, category) VALUES
 ('PM Kisan Samman Nidhi', 'Direct income support scheme for small and marginal farmers providing financial assistance of Rs. 6000 per year.', 'All small and marginal farmers with cultivable land up to 2 hectares. Must be Indian citizen.', 'Rs. 6000 per year in 3 installments of Rs. 2000 each directly to bank account.', 'Agriculture'),
