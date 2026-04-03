@@ -3,3 +3,5 @@ PyMySQL
 Werkzeug
 mysql-connector-python
 gunicorn==20.1.0
+setuptools==68.0.0
+wheel==0.40.0
