@@ -13,21 +13,18 @@ app.config.from_object(Config)
 
 # ============================================
 # DATABASE CONNECTION
-# ============================================
-
 def get_db():
-    """Get MySQL database connection."""
+
     return pymysql.connect(
-        host=app.config['MYSQL_HOST'],
-        user=app.config['MYSQL_USER'],
-        password=app.config['MYSQL_PASSWORD'],
-        db=app.config['MYSQL_DB'],
-        port=app.config['MYSQL_PORT'],
-        charset='utf8mb4',
+        host=app.config["MYSQL_HOST"],
+        user=app.config["MYSQL_USER"],
+        password=app.config["MYSQL_PASSWORD"],
+        db=app.config["MYSQL_DB"],
+        port=app.config["MYSQL_PORT"],
+        charset="utf8mb4",
         cursorclass=pymysql.cursors.DictCursor,
         autocommit=True
     )
-
 # ============================================
 # AUTH DECORATORS
 # ============================================
