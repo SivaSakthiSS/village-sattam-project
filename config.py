@@ -2,7 +2,7 @@
 import os
 from urllib.parse import urlparse
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL', 'mysql://avnadmin:AVNS_HxRpLfGNck3U3pzwLpo@siva-siva.c.aivencloud.com:15802/defaultdb?ssl-mode=REQUIRED')
 
     url = urlparse(DATABASE_URL)
 
